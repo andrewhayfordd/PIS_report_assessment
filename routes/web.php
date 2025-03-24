@@ -183,35 +183,34 @@ Route::middleware(['auth'])->group(function () {
 // });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/assessment', [AssessmentController::class, 'index'])->name('assessments.index');
-    Route::get('/assessment/create', [AssessmentController::class, 'create'])->name('assessments.create');
+    Route::get('/reportassessment', [AssessmentController::class, 'index'])->name('assessments.index');
+    Route::get('/reportassessment/create', [AssessmentController::class, 'create'])->name('assessments.create');
     Route::post('/get-assessment-items', [AssessmentController::class, 'getAssessmentItems'])->name('assessments.getItems');
-    Route::post('/assessment/store', [AssessmentController::class, 'store'])->name('assessments.store');
+    Route::post('/reportassessment/store', [AssessmentController::class, 'store'])->name('assessments.store');
     //Route::get('/assessment/view/{student}/{academicYear}/{term}', [AssessmentController::class, 'view'])->name('assessments.view');
     Route::get('/pdf/{student}/{academicYear}/{term}', [AssessmentController::class, 'generatePDF'])->name('assessments.pdf');
     //Route::get('/assessment/edit/{student}/{academicYear}/{term}', [AssessmentController::class, 'edit'])->name('assessments.edit');
     //Route::post('/assessment/update/{student}/{academicYear}/{term}', [AssessmentController::class, 'update'])->name('assessments.update');
     
-    Route::get('/assessments/view/{student}/{startYear}/{endYear}/{term}', [AssessmentController::class, 'view'])
+    Route::get('/reportassessment/view/{student}/{startYear}/{endYear}/{term}', [AssessmentController::class, 'view'])
     ->where(['startYear' => '[0-9]{4}', 'endYear' => '[0-9]{4}', 'term' => '[1-3]'])
     ->name('assessments.view');
 
-    Route::get('/assessments/edit/{student}/{startYear}/{endYear}/{term}', [AssessmentController::class, 'edit'])
+    Route::get('/reportassessment/edit/{student}/{startYear}/{endYear}/{term}', [AssessmentController::class, 'edit'])
     ->where(['startYear' => '[0-9]{4}', 'endYear' => '[0-9]{4}', 'term' => '[1-3]'])
     ->name('assessments.edit');
 
-    Route::post('/assessments/update/{student}/{startYear}/{endYear}/{term}', [AssessmentController::class, 'update'])
+    Route::post('/reportassessment/update/{student}/{startYear}/{endYear}/{term}', [AssessmentController::class, 'update'])
     ->where(['startYear' => '[0-9]{4}', 'endYear' => '[0-9]{4}', 'term' => '[1-3]'])
     ->name('assessments.update');
 
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/comments', [CommentController::class, 'index'])->name('comments.index');
-    Route::post('/comments/store', [CommentController::class, 'store'])->name('comments.store');
-    Route::get('/comments/edit/{id}', [CommentController::class, 'edit'])->name('comments.edit');
-    Route::put('/comments/update/{id}', [CommentController::class, 'update'])->name('comments.update'); // Change to PUT
-    Route::delete('/comments/delete/{id}', [CommentController::class, 'destroy'])->name('comments.destroy');
+    Route::get('/reportcomments', [CommentController::class, 'index'])->name('comments.index');
+    Route::post('/reportcomments', [CommentController::class, 'store'])->name('comments.store');
+    Route::put('/reportcomments/{transid}', [CommentController::class, 'update'])->name('comments.update');
+    Route::delete('/reportcomments/{transid}', [CommentController::class, 'destroy'])->name('comments.destroy');
 });
 
 Route::get('/logout', function () {

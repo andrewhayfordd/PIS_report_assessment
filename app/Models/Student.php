@@ -77,4 +77,15 @@ class Student extends Model
     {
         $this->attributes["lname"] = strtoupper($value);
     }
+    
+
+    public function getFullNameAttribute()
+    {
+        return trim("{$this->fname} {$this->mname} {$this->lname}");
+    }
+    
+    public function assessments()
+    {
+        return $this->hasMany(Assessment::class, 'student_no', 'student_no');
+    }
 }

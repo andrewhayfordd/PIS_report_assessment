@@ -37,7 +37,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($studentD as $student)
+                                @foreach ($students as $student)
                                     <tr>
                                         <td>{{ $student->student_no }}</td>
                                         <td>{{ $student->student_name }}</td>

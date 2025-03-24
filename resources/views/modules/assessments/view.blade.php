@@ -255,15 +255,15 @@
                                         </div>
                                         
                                         <div class="mt-3">
-                                            <label><strong>Teacher's Comments:</strong></label>
-                                            <p class="border p-3">
-                                                @if(isset($teacherComments))
-                                                    {{ $teacherComments }}
-                                                @else
-                                                    No comments available for this assessment period.
-                                                @endif
-                                            </p>
-                                        </div>
+    <label><strong>Teacher's Comments:</strong></label>
+    <p class="border p-3">
+        @if(isset($teacherComment) && !empty($teacherComment))
+            {{ $teacherComment }}
+        @else
+            No comments available for this assessment period.
+        @endif
+    </p>
+</div>
                                     </div>
                                 </div>
                             </div>

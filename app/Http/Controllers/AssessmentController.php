@@ -16,31 +16,84 @@ use PDF;
 
 class AssessmentController extends Controller
 {
+    // public function index()
+    // {
+    //     $academicYears = DB::table('tblacyear')
+    //     ->select('acyear_desc as academicYear', 'acterm as term')
+    //     ->where('deleted', '0')
+    //     ->where('current_term', '1')
+    //     ->orderBy('acyear_desc', 'desc')
+    //     ->get();
+
+    //     $studentD = Student::where('deleted', '0')
+    //     ->select(
+    //         'tblstudent.student_no',
+    //         'tblstudent.current_class',
+    //         'tblstudent.current_grade',
+    //         'tblstudent.gender',
+    //     DB::raw("TRIM(CONCAT(COALESCE(tblstudent.fname, ''), ' ', COALESCE(tblstudent.mname, ''), ' ', COALESCE(tblstudent.lname, ''))) AS student_name"))
+    //         ->orderBy('fname')
+    //         ->get();
+
+    //     $students = Student::where('deleted', '0')
+    //         ->orderBy('fname')
+    //         ->get();
+        
+    //     return view('modules.assessments.index', compact('students', 'academicYears', 'studentD'));
+    // }
+
+
     public function index()
-    {
-        $academicYears = DB::table('tblacyear')
+{
+    // Get the logged-in teacher's staff number
+    $staffNo = auth()->user()->userid; 
+
+    // Get the class the teacher is assigned to
+    $teacherClass = DB::table('tblclass_teacher')
+        ->where('staff_no', $staffNo)
+        ->where('deleted', '0')
+        ->select('class_code')
+        ->first();
+
+    if (!$teacherClass) {
+        return redirect()->back()->with('error', 'No class assigned to you.');
+    }
+
+    // Get the class description
+    $classDetails = DB::table('tblclass')
+        ->where('class_code', $teacherClass->class_code)
+        ->where('deleted', '0')
+        ->select('class_desc')
+        ->first();
+
+    // Fetch students whose current_class matches the assigned class_code
+    $students = DB::table('tblstudent')
+        ->where('current_class', $teacherClass->class_code)
+        ->where('deleted', '0')
+        ->select(
+            'student_no',
+            'current_class',
+            'current_grade',
+            'gender',
+            DB::raw("TRIM(CONCAT(COALESCE(fname, ''), ' ', COALESCE(mname, ''), ' ', COALESCE(lname, ''))) AS student_name")
+        )
+        ->orderBy('fname')
+        ->get();
+
+    // Get active academic years
+    $academicYears = DB::table('tblacyear')
         ->select('acyear_desc as academicYear', 'acterm as term')
         ->where('deleted', '0')
         ->where('current_term', '1')
         ->orderBy('acyear_desc', 'desc')
         ->get();
 
-        $studentD = Student::where('deleted', '0')
-        ->select(
-            'tblstudent.student_no',
-            'tblstudent.current_class',
-            'tblstudent.current_grade',
-            'tblstudent.gender',
-        DB::raw("TRIM(CONCAT(COALESCE(tblstudent.fname, ''), ' ', COALESCE(tblstudent.mname, ''), ' ', COALESCE(tblstudent.lname, ''))) AS student_name"))
-            ->orderBy('fname')
-            ->get();
+    return view('modules.assessments.index', compact('students', 'academicYears', 'classDetails'));
+}
 
-        $students = Student::where('deleted', '0')
-            ->orderBy('fname')
-            ->get();
-        
-        return view('modules.assessments.index', compact('students', 'academicYears', 'studentD'));
-    }
+    
+
+
     
     public function create()
     {
@@ -174,62 +227,136 @@ class AssessmentController extends Controller
     }
     
 
-    public function view($studentNo, $startYear, $endYear, $term)
+//     public function view($studentNo, $startYear, $endYear, $term)
+// {
+//     $academicYear = $startYear . '/' . $endYear;
+
+//         $student = Student::where('student_no', $studentNo)
+//         ->select(
+//             'tblstudent.student_no',
+//             'tblstudent.current_class',
+//             'tblstudent.current_grade',
+//             DB::raw("TRIM(CONCAT(COALESCE(tblstudent.fname, ''), ' ', COALESCE(tblstudent.mname, ''), ' ', COALESCE(tblstudent.lname, ''))) AS student_name"))
+//         ->first();
+        
+//         if (!$student) {
+//             return redirect()->route('assessments.index')->with('error', 'Student not found!');
+//         }
+        
+//         $assessments = Assessment::where([
+//                 'student_no' => $studentNo,
+//                 'acyear' => $academicYear,
+//                 'term' => $term,
+//                 'deleted' => '0'
+//             ])
+//             ->get();
+
+        
+//         $assessmentItems = [];
+        
+//         foreach ($assessments as $assessment) {
+//             $item = AssessmentItem::where('mcode', $assessment->mcode)
+//                 ->with(['firstCategory', 'secondCategory'])
+//                 ->first();
+            
+//             if ($item) {
+//                 if (!isset($assessmentItems[$item->fcat])) {
+//                     $assessmentItems[$item->fcat] = [
+//                         'name' => $item->firstCategory->desc,
+//                         'subcategories' => []
+//                     ];
+//                 }
+                
+//                 if (!isset($assessmentItems[$item->fcat]['subcategories'][$item->scat])) {
+//                     $assessmentItems[$item->fcat]['subcategories'][$item->scat] = [
+//                         'name' => $item->secondCategory->desc,
+//                         'items' => []
+//                     ];
+//                 }
+                
+//                 $assessmentItems[$item->fcat]['subcategories'][$item->scat]['items'][] = [
+//                     'desc' => $item->desc,
+//                     'result' => $assessment->result
+//                 ];
+//             }
+//         }
+        
+//         return view('modules.assessments.view', compact('student', 'assessmentItems', 'academicYear', 'term'));
+//     }
+
+
+
+public function view($studentNo, $startYear, $endYear, $term)
 {
     $academicYear = $startYear . '/' . $endYear;
 
-        $student = Student::where('student_no', $studentNo)
+    // Fetch student details
+    $student = Student::where('student_no', $studentNo)
         ->select(
             'tblstudent.student_no',
             'tblstudent.current_class',
             'tblstudent.current_grade',
-            DB::raw("TRIM(CONCAT(COALESCE(tblstudent.fname, ''), ' ', COALESCE(tblstudent.mname, ''), ' ', COALESCE(tblstudent.lname, ''))) AS student_name"))
+            DB::raw("TRIM(CONCAT(COALESCE(tblstudent.fname, ''), ' ', COALESCE(tblstudent.mname, ''), ' ', COALESCE(tblstudent.lname, ''))) AS student_name")
+        )
         ->first();
-        
-        if (!$student) {
-            return redirect()->route('assessments.index')->with('error', 'Student not found!');
-        }
-        
-        $assessments = Assessment::where([
-                'student_no' => $studentNo,
-                'acyear' => $academicYear,
-                'term' => $term,
-                'deleted' => '0'
-            ])
-            ->get();
 
-        
-        $assessmentItems = [];
-        
-        foreach ($assessments as $assessment) {
-            $item = AssessmentItem::where('mcode', $assessment->mcode)
-                ->with(['firstCategory', 'secondCategory'])
-                ->first();
-            
-            if ($item) {
-                if (!isset($assessmentItems[$item->fcat])) {
-                    $assessmentItems[$item->fcat] = [
-                        'name' => $item->firstCategory->desc,
-                        'subcategories' => []
-                    ];
-                }
-                
-                if (!isset($assessmentItems[$item->fcat]['subcategories'][$item->scat])) {
-                    $assessmentItems[$item->fcat]['subcategories'][$item->scat] = [
-                        'name' => $item->secondCategory->desc,
-                        'items' => []
-                    ];
-                }
-                
-                $assessmentItems[$item->fcat]['subcategories'][$item->scat]['items'][] = [
-                    'desc' => $item->desc,
-                    'result' => $assessment->result
+    if (!$student) {
+        return redirect()->route('assessments.index')->with('error', 'Student not found!');
+    }
+
+    // Fetch assessments
+    $assessments = Assessment::where([
+            'student_no' => $studentNo,
+            'acyear' => $academicYear,
+            'term' => $term,
+            'deleted' => '0'
+        ])
+        ->get();
+
+    $assessmentItems = [];
+
+    foreach ($assessments as $assessment) {
+        $item = AssessmentItem::where('mcode', $assessment->mcode)
+            ->with(['firstCategory', 'secondCategory'])
+            ->first();
+
+        if ($item) {
+            if (!isset($assessmentItems[$item->fcat])) {
+                $assessmentItems[$item->fcat] = [
+                    'name' => $item->firstCategory->desc,
+                    'subcategories' => []
                 ];
             }
+
+            if (!isset($assessmentItems[$item->fcat]['subcategories'][$item->scat])) {
+                $assessmentItems[$item->fcat]['subcategories'][$item->scat] = [
+                    'name' => $item->secondCategory->desc,
+                    'items' => []
+                ];
+            }
+
+            $assessmentItems[$item->fcat]['subcategories'][$item->scat]['items'][] = [
+                'desc' => $item->desc,
+                'result' => $assessment->result
+            ];
         }
-        
-        return view('modules.assessments.view', compact('student', 'assessmentItems', 'academicYear', 'term'));
     }
+
+    // Fetch teacher's comment for the student
+    $teacherComment = DB::table('tblcomment_ia')
+        ->where([
+            'student_no' => $studentNo,
+            'acyear' => $academicYear,
+            'term' => $term,
+            'deleted' => '0'
+        ])
+        ->value('ct_remarks'); // Get only the comment text
+
+    return view('modules.assessments.view', compact('student', 'assessmentItems', 'academicYear', 'term', 'teacherComment'));
+}
+
+
+
     
     public function generatePDF($studentNo, $startYear, $endYear, $term)
     {
