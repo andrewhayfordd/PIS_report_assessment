@@ -273,9 +273,17 @@
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, save it!"
+        confirmButtonText: "Submit!"
     }).then((result) => {
         if (result.isConfirmed) {
+            Swal.fire({
+                    text: "Submiting...",
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading(); // Show a loading indicator
+                        }
+                    });
             $.ajax({
                 url: "{{ route('assessments.store') }}",
                 type: "POST",

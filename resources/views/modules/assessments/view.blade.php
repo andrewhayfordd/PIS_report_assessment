@@ -33,250 +33,199 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="card-body" id="printSection">
-                    <div class="student-info mb-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <p><strong>Student Name:</strong> {{ $student->student_name }}</p>
-                                        <p><strong>Student No:</strong> {{ $student->student_no }}</p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p><strong>Class:</strong> {{ $student->current_class }}</p>
-                                        <p><strong>Grade:</strong> {{ $student->current_grade }}</p>
-                                        <p><strong>Academic Year:</strong> {{ $academicYear }} - Term {{ $term }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="marking-key mb-4">
-                        <div class="card">
-                            <div class="card-header bg-secondary text-white">
-                                <h6 class="mb-0">Marking Key</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <p><strong>O</strong> - Outstanding (Displays strong performance)</p>
-                                        <p><strong>A</strong> - Very Good (Demonstrates appropriate performance)</p>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <p><strong>B</strong> - Good (Needs occasional support/strengthening)</p>
-                                        <p><strong>C</strong> - Fair (Needs consistent support/strengthening)</p>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <p><strong>D</strong> - Can do better (Needs to work harder and improve)</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="assessment-results">
-                        @if(count($assessmentItems) > 0)
-                            @foreach($assessmentItems as $categoryCode => $category)
-                                <div class="card mb-4">
-                                    <div class="card-header bg-primary text-white">
-                                        <h5 class="mb-0">{{ $category['name'] }}</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        @foreach($category['subcategories'] as $subcategoryCode => $subcategory)
-                                            <div class="mb-4">
-                                                <h6 class="bg-light p-2">{{ $subcategory['name'] }}</h6>
-                                                <div class="table-responsive">
-                                                    <table class="table table-bordered">
-                                                        <thead>
-                                                            <tr>
-                                                                <th width="70%">Assessment Item</th>
-                                                                <th width="30%">Grade</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach($subcategory['items'] as $item)
-                                                                <tr>
-                                                                    <td>{{ $item['desc'] }}</td>
-                                                                    <td>
-                                                                        <span class="badge 
-                                                                            @if($item['result'] == 'O') badge-success
-                                                                            @elseif($item['result'] == 'A') badge-primary
-                                                                            @elseif($item['result'] == 'B') badge-info
-                                                                            @elseif($item['result'] == 'C') badge-warning
-                                                                            @elseif($item['result'] == 'D') badge-danger
-                                                                            @endif
-                                                                            p-2">
-                                                                            {{ $item['result'] }}
-                                                                        </span>
-                                                                        @if($item['result'] == 'O')
-                                                                            - Outstanding
-                                                                        @elseif($item['result'] == 'A')
-                                                                            - Very Good
-                                                                        @elseif($item['result'] == 'B')
-                                                                            - Good
-                                                                        @elseif($item['result'] == 'C')
-                                                                            - Fair
-                                                                        @elseif($item['result'] == 'D')
-                                                                            - Can do better
-                                                                        @endif
-                                                                    </td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endforeach
-                        @else
-                            <div class="alert alert-info">
-                                <h5 class="alert-heading">No Assessment Data</h5>
-                                <p>There are no assessment records for this student in {{ $academicYear }} - Term {{ $term }}.</p>
-                                <hr>
-                                <p class="mb-0">
-                                    <a href="{{ route('assessments.create') }}" class="btn btn-primary">Create New Assessment</a>
-                                </p>
-                            </div>
-                        @endif
-                    </div>
-                    
-                    @if(count($assessmentItems) > 0)
-                        <div class="card mt-4">
-                            <div class="card-header bg-info text-white">
-                                <h5 class="mb-0">Assessment Summary</h5>
-                            </div>
-                            <div class="card-body">
-                                @php
-                                    $totalItems = 0;
-                                    $gradeCount = [
-                                        'O' => 0,
-                                        'A' => 0,
-                                        'B' => 0,
-                                        'C' => 0,
-                                        'D' => 0
-                                    ];
-                                    
-                                    foreach($assessmentItems as $category) {
-                                        foreach($category['subcategories'] as $subcategory) {
-                                            foreach($subcategory['items'] as $item) {
-                                                $totalItems++;
-                                                $gradeCount[$item['result']]++;
-                                            }
-                                        }
-                                    }
-                                @endphp
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <h6>Distribution of Grades</h6>
-                                        <div class="table-responsive">
-                                            <table class="table table-bordered">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Grade</th>
-                                                        <th>Count</th>
-                                                        <th>Percentage</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach($gradeCount as $grade => $count)
-                                                        <tr>
-                                                            <td>
-                                                                <span class="badge 
-                                                                    @if($grade == 'O') badge-success
-                                                                    @elseif($grade == 'A') badge-primary
-                                                                    @elseif($grade == 'B') badge-info
-                                                                    @elseif($grade == 'C') badge-warning
-                                                                    @elseif($grade == 'D') badge-danger
-                                                                    @endif
-                                                                    p-2">
-                                                                    {{ $grade }}
-                                                                </span>
-                                                            </td>
-                                                            <td>{{ $count }}</td>
-                                                            <td>{{ $totalItems > 0 ? round(($count / $totalItems) * 100, 1) : 0 }}%</td>
-                                                        </tr>
-                                                    @endforeach
-                                                </tbody>
-                                                <tfoot>
-                                                    <tr>
-                                                        <th>Total</th>
-                                                        <th>{{ $totalItems }}</th>
-                                                        <th>100%</th>
-                                                    </tr>
-                                                </tfoot>
-                                            </table>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <h6>Overall Performance</h6>
-                                        @php
-                                            $weightedScore = 0;
-                                            $weights = [
-                                                'O' => 5,
-                                                'A' => 4,
-                                                'B' => 3,
-                                                'C' => 2,
-                                                'D' => 1
-                                            ];
-                                            
-                                            foreach($gradeCount as $grade => $count) {
-                                                $weightedScore += $weights[$grade] * $count;
-                                            }
-                                            
-                                            $averageScore = $totalItems > 0 ? $weightedScore / $totalItems : 0;
-                                            $performanceLevel = '';
-                                            
-                                            if ($averageScore >= 4.5) {
-                                                $performanceLevel = 'Outstanding';
-                                                $performanceClass = 'success';
-                                            } elseif ($averageScore >= 3.5) {
-                                                $performanceLevel = 'Very Good';
-                                                $performanceClass = 'primary';
-                                            } elseif ($averageScore >= 2.5) {
-                                                $performanceLevel = 'Good';
-                                                $performanceClass = 'info';
-                                            } elseif ($averageScore >= 1.5) {
-                                                $performanceLevel = 'Fair';
-                                                $performanceClass = 'warning';
-                                            } else {
-                                                $performanceLevel = 'Needs Improvement';
-                                                $performanceClass = 'danger';
-                                            }
-                                        @endphp
-                                        
-                                        <div class="alert alert-{{ $performanceClass }} text-center">
-                                            <h4>{{ $performanceLevel }}</h4>
-                                            <p>Average Score: {{ number_format($averageScore, 1) }} / 5.0</p>
-                                        </div>
-                                        
-                                        <div class="mt-3">
-    <label><strong>Teacher's Comments:</strong></label>
-    <p class="border p-3">
-        @if(isset($teacherComment) && !empty($teacherComment))
-            {{ $teacherComment }}
-        @else
-            No comments available for this assessment period.
-        @endif
-    </p>
-</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
+
+
+
+
+    <div style="padding: 20px; font-family: Arial, sans-serif; line-height: 1.6;" id="printSection">
+    <h3 style="text-align: center; color: #007bff; font-weight: bold;">PIS – MODEL MONTESSORI SCHOOL</h3>
+    <h5 style="text-align: center; font-weight: bold;">CAMBRIDGE ASSESSMENT INTERNATIONAL EDUCATION</h5>
+    <h6 style="text-align: center; font-weight: bold;">FIRST TERM, 2024/2025 ACADEMIC YEAR</h6>
+    <h4 style="text-align: center; margin-top: 20px; font-weight: bold; text-decoration: underline;">FINAL ASSESSMENT REPORT</h4>
+    
+    <div style="border: 2px solid #000; padding: 15px; margin-bottom: 20px; background-color: #f8f9fa;">
+        <div style="display: flex; justify-content: space-between;">
+
+            <div>
+                <p><strong>Student No:</strong> {{ $student->student_no }}</p>
+            </div>
+            <div>
+            <p><strong>Student Name:</strong> {{ $student->student_name }}</p>
+            </div>
+
+        </div>
+
+        
+            <div style="display: flex; justify-content: space-between;">
+                <div>
+                <p><strong>Class:</strong> {{ $student->current_class }}</p>
                 </div>
+                <div>
+                <p><strong>Grade:</strong> {{ $student->current_grade }}</p>
+                </div>
+                <div>
+                <p><strong>Academic Year:</strong> {{ $academicYear }} - Term {{ $term }}</p>
+                </div>
+            </div>
+
+        </div>
+    
+        
+        <div style="display: flex; width: full; justify-content: space-between; gap: 2rem">
+        <div style="border: 2px solid #000; padding: 15px; margin-bottom: 20px; background-color: #fff; width: 30%">
+        <h6 style="font-weight: bold; text-decoration: underline;">Attendance</h6>
+        <table style="width: 100%; border-collapse: collapse; border: 2px solid #000;">
+            <thead>
+                <tr style="background: #ddd;">
+                    <th style="border: 2px solid #000; padding: 8px;">Status</th>
+                    <th style="border: 2px solid #000; padding: 8px;">Term</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="border: 2px solid #000; padding: 8px; text-align: left;">Present</td>
+                    <td style="border: 2px solid #000; padding: 8px;"> </td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid #000; padding: 8px; text-align: left;">Absent</td>
+                    <td style="border: 2px solid #000; padding: 8px;"></td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid #000; padding: 8px; text-align: left;">Total</td>
+                    <td style="border: 2px solid #000; padding: 8px;"></td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid #000; padding: 8px; text-align: left;">.</td>
+                    <td style="border: 2px solid #000; padding: 8px;">.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div style="border: 2px solid #000; padding: 15px; margin-bottom: 20px; background-color: #fff; width:70%;">
+        <h6 style="font-weight: bold; text-decoration: underline;">Marking Key</h6>
+        <table style="width: 100%; border-collapse: collapse; border: 2px solid #000;">
+            <thead>
+                <tr style="background: #ddd;">
+                    <th style="border: 2px solid #000; padding: 8px;">Grade</th>
+                    <th style="border: 2px solid #000; padding: 8px;">Grade</th>
+                    <th style="border: 2px solid #000; padding: 8px;">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="border: 2px solid #000; padding: 4px; text-align: left; font-size: 14px;"><strong>Outstanding</strong></td>
+                    <td style="border: 2px solid #000; padding: 4px; text-align: left; font-size: 14px;"><strong>O</strong></td>
+                    <td style="border: 2px solid #000; padding: 4px; font-size: 14px;">Displays strong performance</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid #000; padding: 4px; text-align: left; font-size: 14px;"><strong>Very Good</strong></td>
+                    <td style="border: 2px solid #000; padding: 4px; text-align: left; font-size: 14px;"><strong>A</strong></td>
+                    <td style="border: 2px solid #000; padding: 8px; font-size: 14px;">Demonstrates appropriate performance</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid #000; padding: 4px; text-align: left; font-size: 14px;"><strong>Good </strong></td>
+                    <td style="border: 2px solid #000; padding: 4px; text-align: left; font-size: 14px;"><strong>B</strong></td>
+                    <td style="border: 2px solid #000; padding: 4px; font-size: 14px;">Needs occasional support/strengthening</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid #000; padding: 4px; text-align: left; font-size: 14px;"><strong>Fair</strong></td>
+                    <td style="border: 2px solid #000; padding: 4px; text-align: left; font-size: 14px;"><strong>C</strong></td>
+                    <td style="border: 2px solid #000; padding: 4px; font-size: 14px;">Needs consistent support/strengthening</td>
+                </tr>
+                <tr>
+                    <td style="border: 2px solid #000; padding: 4px; text-align: left; font-size: 14px;"><strong>Can do better</strong></td>
+                    <td style="border: 2px solid #000; padding: 4px; text-align: left; font-size: 14px;"><strong>D</strong></td>
+                    <td style="border: 2px solid #000; padding: 4px; font-size: 14px;">Needs to work harder and improve</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+        </div>
+
+    
+    @if(count($assessmentItems) > 0)
+        @foreach($assessmentItems as $categoryCode => $category)
+            <div style="border: 2px solid #000; padding: 15px; margin-bottom: 20px;">
+                <h5 style="font-weight: bold;">{{ $category['name'] }}</h5>
+                @foreach($category['subcategories'] as $subcategoryCode => $subcategory)
+                    <h6 style="background: #f8f9fa; padding: 10px; font-weight: bold;">{{ $subcategory['name'] }}</h6>
+                    <table style="width: 100%; border-collapse: collapse; border: 2px solid #000;">
+                        <thead>
+                            <tr style="background: #ddd;">
+                                <th style="border: 2px solid #000; padding: 8px;">Assessment Item</th>
+                                <th style="border: 2px solid #000; padding: 8px;">Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($subcategory['items'] as $item)
+                                <tr>
+                                    <td style="border: 2px solid #000; padding: 4px; font-size:14px;">{{ $item['desc'] }}</td>
+                                    <td style="border: 2px solid #000; padding: 4px 7px; text-align: center;">
+                                        {{ $item['result'] }}
+                                        @if($item['result'] == 'O') 
+                                        @elseif($item['result'] == 'A')
+                                        @elseif($item['result'] == 'B')
+                                        @elseif($item['result'] == 'C')
+                                        @elseif($item['result'] == 'D')
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endforeach
+            </div>
+        @endforeach
+    @else
+        <div style="border: 2px solid #000; padding: 15px; background: #f8d7da; color: #721c24;">
+            <h5>No Assessment Data</h5>
+            <p>There are no assessment records for this student in {{ $academicYear }} - Term {{ $term }}.</p>
+        </div>
+    @endif
+    
+
+    <br/>
+    <br/>
+    @if(count($assessmentItems) > 0)
+        <div style="border: 2px solid #000; padding: 15px; margin-top: 20px;">
+            <h5 style="font-weight: bold;">Assessment Summary</h5>
+            <p><strong>Teacher's Comments:</strong> {{ isset($teacherComment) && !empty($teacherComment) ? $teacherComment : 'No comments available.' }}</p>
+        </div>
+    @endif
+    
+    <br/>
+    <br/>
+    <br/>
+    <div style="margin-top: 20px; display: flex; justify-content: space-between;">
+        <div>
+            <p><strong>Sign:</strong> ____________________</p>
+            <p>Class Teacher</p>
+        </div>
+        <div>
+            <p><strong>Sign:</strong> ____________________</p>
+            <p>Academic Coordinator</p>
+        </div>
+    </div>
+</div>
+    </div>
+
+
+
+
+
+
+
             </div>
         </div>
     </div>
 </div>
 
+
 <script>
-    function printReport() {
+
+function printReport() {
                 let printContent = document.getElementById('printSection').innerHTML;
                 let printWindow = window.open('', '_blank');
 
@@ -304,6 +253,7 @@
                     printWindow.close();
                 };
             }
+
 
             function downloadPDF() {
                 // Ensure jsPDF and html2canvas are available
@@ -338,4 +288,5 @@
                 }).catch(error => console.error("Error generating PDF:", error));
             }
 </script>
+
 @endsection

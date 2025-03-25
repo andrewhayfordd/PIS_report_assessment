@@ -180,6 +180,14 @@
         confirmButtonText: "Update!"
     }).then((result) => {
         if (result.isConfirmed) {
+               Swal.fire({
+                    text: "Updating...",
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading(); // Show a loading indicator
+                        }
+                    });
             $.ajax({
                 url: "{{ route('assessments.update', ['student' => $student->student_no, 'startYear' => $startYear, 'endYear' => $endYear, 'term' => $term]) }}",
                 type: "POST",

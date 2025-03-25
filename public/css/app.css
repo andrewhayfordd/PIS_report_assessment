@@ -41,6 +41,7 @@ html {
 */
 
 body {
+  color: #0011ff00;
   margin: 0; /* 1 */
   line-height: inherit; /* 2 */
 }

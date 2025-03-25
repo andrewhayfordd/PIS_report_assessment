@@ -9,63 +9,117 @@ use Carbon\Carbon;
 
 class CommentController extends Controller
 {
+    // public function index(Request $request)
+    // {
+    //     // Get the logged-in teacher's assigned class
+    //     $teacherClass = DB::table('tblclass_teacher')
+    //         ->where('staff_no', Auth::user()->userid)
+    //         ->value('class_code');
+
+    //     // Filter parameters
+    //     $acyear = $request->input('acyear');
+    //     $term = $request->input('term');
+
+    //     // Query to get students with assessments in the teacher's class
+    //     $students = DB::table('tblreport_assessment as ra')
+    //         ->join('tblstudent as s', 'ra.student_no', '=', 's.student_no')
+    //         ->leftJoin('tblcomment_ia as ci', function($join) use ($acyear, $term) {
+    //             $join->on('ra.student_no', '=', 'ci.student_no')
+    //                  ->where('ci.acyear', $acyear)
+    //                  ->where('ci.term', $term)
+    //                  ->where('ci.deleted', '0');
+    //         })
+    //         ->where('s.current_class', $teacherClass)
+    //         //->where('tblcomment_ia.deleted', '0')
+    //         ->when($acyear, function($query) use ($acyear) {
+    //             return $query->where('ra.acyear', $acyear);
+    //         })
+    //         ->when($term, function($query) use ($term) {
+    //             return $query->where('ra.term', $term);
+    //         })
+    //         ->select(
+    //             's.student_no', 
+    //             DB::raw('CONCAT(s.fname, " ", s.mname, " ", s.lname) as full_name'), 
+    //             's.current_class',
+    //             'ci.ct_remarks',
+    //             'ci.transid as comment_id'
+    //         )
+    //         ->distinct()
+    //         ->get();
+
+    //     // Get unique academic years and terms for filtering
+    //     $academicYears = DB::table('tblreport_assessment')
+    //         ->select('acyear')
+    //         ->distinct()
+    //         ->pluck('acyear');
+
+    //     $terms = DB::table('tblreport_assessment')
+    //         ->select('term')
+    //         ->distinct()
+    //         ->pluck('term');
+
+    //     return view('modules.comment.index', [
+    //         'students' => $students,
+    //         'academicYears' => $academicYears,
+    //         'terms' => $terms,
+    //         'selectedAcYear' => $acyear,
+    //         'selectedTerm' => $term
+    //     ]);
+    // }
+
+
     public function index(Request $request)
-    {
-        // Get the logged-in teacher's assigned class
-        $teacherClass = DB::table('tblclass_teacher')
-            ->where('staff_no', Auth::user()->userid)
-            ->value('class_code');
+{
+    // Get the logged-in teacher's assigned class
+    $teacherClass = DB::table('tblclass_teacher')
+        ->where('staff_no', Auth::user()->userid)
+        ->value('class_code');
 
-        // Filter parameters
-        $acyear = $request->input('acyear');
-        $term = $request->input('term');
+    // Get the current academic year and term
+    $currentAcademicYear = DB::table('tblacyear')
+        ->where('current_term', '1')
+        ->where('deleted', '0')
+        ->select('acyear_desc', 'acterm')
+        ->first();
 
-        // Query to get students with assessments in the teacher's class
-        $students = DB::table('tblreport_assessment as ra')
-            ->join('tblstudent as s', 'ra.student_no', '=', 's.student_no')
-            ->leftJoin('tblcomment_ia as ci', function($join) use ($acyear, $term) {
-                $join->on('ra.student_no', '=', 'ci.student_no')
-                     ->where('ci.acyear', $acyear)
-                     ->where('ci.term', $term)
-                     ->where('ci.deleted', '0');
-            })
-            ->where('s.current_class', $teacherClass)
-            //->where('tblcomment_ia.deleted', '0')
-            ->when($acyear, function($query) use ($acyear) {
-                return $query->where('ra.acyear', $acyear);
-            })
-            ->when($term, function($query) use ($term) {
-                return $query->where('ra.term', $term);
-            })
-            ->select(
-                's.student_no', 
-                DB::raw('CONCAT(s.fname, " ", s.mname, " ", s.lname) as full_name'), 
-                's.current_class',
-                'ci.ct_remarks',
-                'ci.transid as comment_id'
-            )
-            ->distinct()
-            ->get();
-
-        // Get unique academic years and terms for filtering
-        $academicYears = DB::table('tblreport_assessment')
-            ->select('acyear')
-            ->distinct()
-            ->pluck('acyear');
-
-        $terms = DB::table('tblreport_assessment')
-            ->select('term')
-            ->distinct()
-            ->pluck('term');
-
-        return view('modules.comment.index', [
-            'students' => $students,
-            'academicYears' => $academicYears,
-            'terms' => $terms,
-            'selectedAcYear' => $acyear,
-            'selectedTerm' => $term
-        ]);
+    // Ensure we have valid data
+    if (!$currentAcademicYear) {
+        return redirect()->back()->with('error', 'No active academic year found.');
     }
+
+    // Extract values
+    $acyear = $currentAcademicYear->acyear_desc;
+    $term = $currentAcademicYear->acterm;
+
+    // Query to get students with assessments in the teacher's class
+    $students = DB::table('tblreport_assessment as ra')
+        ->join('tblstudent as s', 'ra.student_no', '=', 's.student_no')
+        ->leftJoin('tblcomment_ia as ci', function ($join) use ($acyear, $term) {
+            $join->on('ra.student_no', '=', 'ci.student_no')
+                ->where('ci.acyear', $acyear)
+                ->where('ci.term', $term)
+                ->where('ci.deleted', '0');
+        })
+        ->where('s.current_class', $teacherClass)
+        ->where('ra.acyear', $acyear)
+        ->where('ra.term', $term)
+        ->select(
+            's.student_no',
+            DB::raw('CONCAT(s.fname, " ", s.mname, " ", s.lname) as full_name'),
+            's.current_class',
+            'ci.ct_remarks',
+            'ci.transid as comment_id'
+        )
+        ->distinct()
+        ->get();
+
+    return view('modules.comment.index', [
+        'students' => $students,
+        'selectedAcYear' => $acyear,
+        'selectedTerm' => $term
+    ]);
+}
+
 
     public function store(Request $request)
     {

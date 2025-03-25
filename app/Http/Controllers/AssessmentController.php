@@ -16,34 +16,8 @@ use PDF;
 
 class AssessmentController extends Controller
 {
-    // public function index()
-    // {
-    //     $academicYears = DB::table('tblacyear')
-    //     ->select('acyear_desc as academicYear', 'acterm as term')
-    //     ->where('deleted', '0')
-    //     ->where('current_term', '1')
-    //     ->orderBy('acyear_desc', 'desc')
-    //     ->get();
-
-    //     $studentD = Student::where('deleted', '0')
-    //     ->select(
-    //         'tblstudent.student_no',
-    //         'tblstudent.current_class',
-    //         'tblstudent.current_grade',
-    //         'tblstudent.gender',
-    //     DB::raw("TRIM(CONCAT(COALESCE(tblstudent.fname, ''), ' ', COALESCE(tblstudent.mname, ''), ' ', COALESCE(tblstudent.lname, ''))) AS student_name"))
-    //         ->orderBy('fname')
-    //         ->get();
-
-    //     $students = Student::where('deleted', '0')
-    //         ->orderBy('fname')
-    //         ->get();
-        
-    //     return view('modules.assessments.index', compact('students', 'academicYears', 'studentD'));
-    // }
-
-
-    public function index()
+    
+public function index()
 {
     // Get the logged-in teacher's staff number
     $staffNo = auth()->user()->userid; 
@@ -55,8 +29,14 @@ class AssessmentController extends Controller
         ->select('class_code')
         ->first();
 
+    // If no class is assigned, return the view with an empty student list and message
     if (!$teacherClass) {
-        return redirect()->back()->with('error', 'No class assigned to you.');
+        return view('modules.assessments.index', [
+            'students' => [],
+            'academicYears' => [],
+            'classDetails' => null,
+            'noClassMessage' => 'No class assigned to you.'
+        ]);
     }
 
     // Get the class description
@@ -91,19 +71,33 @@ class AssessmentController extends Controller
     return view('modules.assessments.index', compact('students', 'academicYears', 'classDetails'));
 }
 
-    
 
 
     
     public function create()
     {
-        $students = Student::where('deleted', '0')
+
+        $staffNo = auth()->user()->userid; 
+
+    // Get the class the teacher is assigned to
+    $teacherClass = DB::table('tblclass_teacher')
+        ->where('staff_no', $staffNo)
+        ->where('deleted', '0')
+        ->select('class_code')
+        ->first();
+        
+            $students = DB::table('tblstudent')
+        ->where('current_class', $teacherClass->class_code)
+        ->where('deleted', '0')
         ->select(
-            'tblstudent.student_no',
-            'tblstudent.current_class',
-            DB::raw("TRIM(CONCAT(COALESCE(tblstudent.fname, ''), ' ', COALESCE(tblstudent.mname, ''), ' ', COALESCE(tblstudent.lname, ''))) AS student_name"))
-            ->orderBy('fname')
-            ->get();
+            'student_no',
+            'current_class',
+            'current_grade',
+            'gender',
+            DB::raw("TRIM(CONCAT(COALESCE(fname, ''), ' ', COALESCE(mname, ''), ' ', COALESCE(lname, ''))) AS student_name")
+        )
+        ->orderBy('fname')
+        ->get();
         
             $academicYears = DB::table('tblacyear')
             //->select('acyear_desc as academicYear', 'acterm as term')

@@ -5,7 +5,7 @@
     <h1>Student Comments</h1>
 
     {{-- Filter Form --}}
-    <form method="GET" action="{{ route('comments.index') }}" class="mb-4">
+    {{--<form method="GET" action="{{ route('comments.index') }}" class="mb-4">
         <div class="row">
             <div class="col-md-4">
                 <select name="acyear" class="form-control">
@@ -34,7 +34,7 @@
                 <a href="{{ route('comments.index') }}" class="btn btn-secondary">Reset</a>
             </div>
         </div>
-    </form>
+    </form>--}}
 
     {{-- Search Bar --}}
     <input type="text" id="searchStudent" class="form-control mb-3" placeholder="Search by Student No or Name">
