@@ -40,7 +40,7 @@
     <div style="padding: 20px; font-family: Arial, sans-serif; line-height: 1.6;" id="printSection">
     <h3 style="text-align: center; color: #007bff; font-weight: bold;">PIS – MODEL MONTESSORI SCHOOL</h3>
     <h5 style="text-align: center; font-weight: bold;">CAMBRIDGE ASSESSMENT INTERNATIONAL EDUCATION</h5>
-    <h6 style="text-align: center; font-weight: bold;">FIRST TERM, 2024/2025 ACADEMIC YEAR</h6>
+    <h6 style="text-align: center; font-weight: bold;">TERM {{ $term }}, {{ $academicYear }} ACADEMIC YEAR</h6>
     <h4 style="text-align: center; margin-top: 20px; font-weight: bold; text-decoration: underline;">FINAL ASSESSMENT REPORT</h4>
     
     <div style="border: 2px solid #000; padding: 15px; margin-bottom: 20px; background-color: #f8f9fa;">
